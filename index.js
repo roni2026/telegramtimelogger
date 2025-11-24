@@ -13,27 +13,20 @@ const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, {
 // --- Function to detect login/logout events ---
 function detectEvent(text) {
   if (!text) return null;
-
   text = text.toLowerCase();
-
   const pattern = /^(m|d|e|se|n|m1|d1|e1|se1|n1)\s*[- ]?\s*(login|logout)/;
-
   const match = text.match(pattern);
   if (!match) return null;
-
-  const type = match[2] === "login" ? "LOGIN" : "LOGOUT";
-  return type;
+  return match[2] === "login" ? "LOGIN" : "LOGOUT";
 }
 
 // --- Telegram message listener ---
 bot.on("message", async (msg) => {
   const chatId = msg.chat.id;
-  const agent =
-    `${msg.from.first_name || ""} ${msg.from.last_name || ""}`.trim();
+  const agent = `${msg.from.first_name || ""} ${msg.from.last_name || ""}`.trim();
   const text = msg.text || "";
   const eventType = detectEvent(text);
 
-  // extract attachment URL if exists
   let attachment = null;
 
   try {
@@ -60,7 +53,6 @@ bot.on("message", async (msg) => {
         message: text,
         attachment,
       });
-
       bot.sendMessage(chatId, `✔ ${agent} ${eventType} logged`);
     } catch (err) {
       console.error("Error logging event:", err);
@@ -69,12 +61,10 @@ bot.on("message", async (msg) => {
   }
 });
 
-// --- Express server to keep Render awake ---
+// --- Express server for Render ---
 const app = express();
 
-// Optional health check endpoint
 app.get("/", (req, res) => res.send("Telegram bot is running 🚀"));
 
-// Listen on Render-assigned port
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Express server listening on port ${PORT}`));
